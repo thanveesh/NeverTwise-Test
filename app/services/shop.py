@@ -25,7 +25,9 @@ def create_product(connection: sqlite3.Connection, payload: ProductCreate) -> Pr
         (payload.name, payload.description, payload.price_cents, payload.quantity),
     )
     connection.commit()
-    row = connection.execute("SELECT * FROM products WHERE id = ?", (cursor.lastrowid,)).fetchone()
+    row = connection.execute(
+        "SELECT * FROM products WHERE id = ?", (cursor.lastrowid,)
+    ).fetchone()
     return _product(row)
 
 
@@ -35,7 +37,9 @@ def list_products(connection: sqlite3.Connection) -> list[Product]:
 
 
 def get_product(connection: sqlite3.Connection, product_id: int) -> Product:
-    row = connection.execute("SELECT * FROM products WHERE id = ?", (product_id,)).fetchone()
+    row = connection.execute(
+        "SELECT * FROM products WHERE id = ?", (product_id,)
+    ).fetchone()
     if row is None:
         raise ProductNotFound(f"Product {product_id} was not found")
     return _product(row)
@@ -64,8 +68,7 @@ def create_order(connection: sqlite3.Connection, payload: OrderCreate) -> Order:
         ).fetchone()
         if row is None:
             raise ProductNotFound(f"Product {payload.product_id} was not found")
-        if row["quantity"] < payload.quantity:
-            raise InsufficientInventory("Requested quantity exceeds available inventory")
+
         connection.execute(
             "UPDATE products SET quantity = quantity - ? WHERE id = ?",
             (payload.quantity, payload.product_id),
